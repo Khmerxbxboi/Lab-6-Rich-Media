@@ -1,0 +1,121 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="author" content="Bulli Sot">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sodaro - Application-Driven Solutions for a New Era </title>
+    
+    <link href="mystyle.css" rel="stylesheet" type="text/css">
+
+    <h1>🎧 Jaya Media Lab</h1>
+
+    <div class="media-section">
+      <h2>HTML5 Video Player of Bulli Sot Beginning of Tech Design Career 2012+</h2>
+      <video controls poster="https://img.youtube.com/vi/GOZLkUM7U68/maxresdefault.jpg">
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        <track src="captions.vtt" kind="subtitles" srclang="en" label="English">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  
+    <div class="media-section">
+      <h2>🎶 Bulli Sot first Mixer using Reason, Fruityloops, & Adobe Audition</h2>
+      <iframe 
+        scrolling="no" 
+        frameborder="no" 
+        allow="autoplay" 
+        src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/angkorian/jaya-ali-wanted-you&color=%2300ced1&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true">
+      </iframe>
+    </div>
+
+    <h1>Mini Check Game</h1>
+    <div id="scoreboard">Score: <span id="score">0</span></div>
+    <div id="board"></div>
+    <div id="end-message"></div>
+  
+    <script>
+      const board = document.getElementById('board');
+      const scoreDisplay = document.getElementById('score');
+      const endMessage = document.getElementById('end-message');
+  
+      let score = 0;
+      let selected = null;
+  
+      const squares = [];
+      const boardSize = 8;
+  
+      // Build board
+      for (let row = 0; row < boardSize; row++) {
+        for (let col = 0; col < boardSize; col++) {
+          const square = document.createElement('div');
+          square.classList.add('square');
+          square.classList.add((row + col) % 2 === 0 ? 'light' : 'dark');
+          square.dataset.row = row;
+          square.dataset.col = col;
+          board.appendChild(square);
+          squares.push(square);
+        }
+      }
+  
+      // Add player and enemies
+      function setupPieces() {
+        squares.forEach(sq => sq.innerHTML = '');
+        for (let i = 0; i < 8; i++) {
+          const enemy = document.createElement('div');
+          enemy.classList.add('enemy');
+          squares[i].appendChild(enemy);
+        }
+  
+        const player = document.createElement('div');
+        player.classList.add('player');
+        squares[56].appendChild(player);
+      }
+  
+      setupPieces();
+  
+      board.addEventListener('click', (e) => {
+        const square = e.target.closest('.square');
+        if (!square) return;
+  
+        const piece = square.querySelector('.player');
+  
+        if (piece) {
+          selected = square;
+        } else if (selected) {
+          const targetRow = parseInt(square.dataset.row);
+          const targetCol = parseInt(square.dataset.col);
+          const startRow = parseInt(selected.dataset.row);
+          const startCol = parseInt(selected.dataset.col);
+  
+          const rowDiff = targetRow - startRow;
+          const colDiff = Math.abs(targetCol - startCol);
+  
+          if (rowDiff === -1 && colDiff === 1) {
+            square.appendChild(selected.querySelector('.player'));
+            selected = null;
+  
+            if (square.querySelector('.enemy')) {
+              square.removeChild(square.querySelector('.enemy'));
+              score += 10;
+              scoreDisplay.textContent = score;
+  
+              if (document.querySelectorAll('.enemy').length === 0) {
+                endMessage.textContent = "You win!";
+              }
+            }
+          }
+        }
+      });
+  
+      // Optional: lose condition after timer
+      setTimeout(() => {
+        if (document.querySelectorAll('.enemy').length > 0) {
+          endMessage.textContent = "You lost! Enemies remain.";
+          board.style.pointerEvents = 'none';
+        }
+      }, 30000); // 30 seconds to win
+    </script>
+  
+  </body>
+  </html>

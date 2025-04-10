@@ -1,0 +1,206 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="author" content="Bulli Sot">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jaya Production </title>
+    
+    <link href="mystyle.css" rel="stylesheet" type="text/css">
+
+    <h1>🎧 Jaya Media Lab</h1>
+
+    <div class="media-section">
+      <h2>HTML5 Video Player of Bulli Sot Beginning of Tech Design Career 2012+</h2>
+      <video controls poster="https://img.youtube.com/vi/GOZLkUM7U68/maxresdefault.jpg">
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+        <track src="captions.vtt" kind="subtitles" srclang="en" label="English">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  
+    <div class="media-section">
+      <h2>🎶 Bulli Sot first Mixer using Reason, Fruityloops, & Adobe Audition</h2>
+      <iframe 
+        scrolling="no" 
+        frameborder="no" 
+        allow="autoplay" 
+        src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/angkorian/jaya-ali-wanted-you&color=%2300ced1&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true">
+      </iframe>
+    </div>
+
+    <h1>Mini Check Game</h1>
+    <div id="scoreboard">Red: <span id="score1">0</span> | Black: <span id="score2">0</span></div>
+    <div id="board"></div>
+    <div class="winner" id="winnerMsg"></div>
+    
+    <div id="leaderboard">
+      <h2>🏆 Leaderboard</h2>
+      <div id="leaderboard-list"></div>
+    </div>
+    
+    <script>
+      const board = document.getElementById("board");
+      const score1El = document.getElementById("score1");
+      const score2El = document.getElementById("score2");
+      const winnerMsg = document.getElementById("winnerMsg");
+      const leaderboardList = document.getElementById("leaderboard-list");
+    
+      const size = 8;
+      let currentPlayer = "player1";
+      let score1 = 0;
+      let score2 = 0;
+      let selectedSquare = null;
+      let leaderboard = [];
+    
+      function createBoard() {
+        board.innerHTML = '';
+        for (let row = 0; row < size; row++) {
+          for (let col = 0; col < size; col++) {
+            const square = document.createElement("div");
+            square.className = "square " + ((row + col) % 2 === 0 ? "light" : "dark");
+            square.dataset.row = row;
+            square.dataset.col = col;
+            board.appendChild(square);
+          }
+        }
+      }
+    
+      function getSquare(row, col) {
+        return document.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
+      }
+    
+      function placePieces() {
+        for (let col = 0; col < 8; col++) {
+          const sqTop = getSquare(0, col);
+          const sqBottom = getSquare(7, col);
+    
+          const p2 = document.createElement("div");
+          p2.classList.add("player2");
+          sqTop.appendChild(p2);
+    
+          const p1 = document.createElement("div");
+          p1.classList.add("player1");
+          sqBottom.appendChild(p1);
+        }
+      }
+    
+      function animatePieceMove(piece, toSquare) {
+        const fromRect = piece.getBoundingClientRect();
+        toSquare.appendChild(piece);
+        const toRect = piece.getBoundingClientRect();
+    
+        const dx = fromRect.left - toRect.left;
+        const dy = fromRect.top - toRect.top;
+    
+        piece.style.transform = `translate(${dx}px, ${dy}px)`;
+        requestAnimationFrame(() => {
+          piece.style.transition = 'transform 0.3s ease';
+          piece.style.transform = 'translate(0, 0)';
+        });
+    
+        setTimeout(() => {
+          piece.style.transition = '';
+        }, 300);
+      }
+    
+      function isValidMove(fromRow, fromCol, toRow, toCol) {
+        const rowDiff = Math.abs(fromRow - toRow);
+        const colDiff = Math.abs(fromCol - toCol);
+        return rowDiff === 1 && colDiff === 1;
+      }
+    
+      function switchPlayer() {
+        currentPlayer = currentPlayer === "player1" ? "player2" : "player1";
+      }
+    
+      function updateScores() {
+        score1El.textContent = score1;
+        score2El.textContent = score2;
+      }
+    
+      function checkWinner() {
+        const redLeft = document.querySelectorAll('.player1').length;
+        const blackLeft = document.querySelectorAll('.player2').length;
+        if (redLeft === 0) {
+          showWinner("Black");
+        } else if (blackLeft === 0) {
+          showWinner("Red");
+        }
+      }
+    
+      function showWinner(winner) {
+        winnerMsg.textContent = `${winner} wins!`;
+        setTimeout(() => {
+          const name = prompt("Enter your name for the leaderboard:");
+          leaderboard.push({ name: name || 'Player', score: winner === 'Red' ? score1 : score2 });
+          leaderboard.sort((a, b) => b.score - a.score);
+          updateLeaderboard();
+        }, 300);
+      }
+    
+      function updateLeaderboard() {
+        leaderboardList.innerHTML = '';
+        leaderboard.slice(0, 5).forEach((entry, idx) => {
+          leaderboardList.innerHTML += `<div>${idx + 1}. ${entry.name} - ${entry.score} pts</div>`;
+        });
+    
+        // Optional: send data to a backend server
+        // fetch("/submit-score", {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify({ name: entry.name, score: entry.score })
+        // });
+      }
+    
+      board.addEventListener("click", (e) => {
+        const square = e.target.closest(".square");
+        if (!square) return;
+    
+        const piece = square.querySelector(`.${currentPlayer}`);
+    
+        if (piece) {
+          selectedSquare = square;
+        } else if (selectedSquare) {
+          const fromRow = parseInt(selectedSquare.dataset.row);
+          const fromCol = parseInt(selectedSquare.dataset.col);
+          const toRow = parseInt(square.dataset.row);
+          const toCol = parseInt(square.dataset.col);
+    
+          if (isValidMove(fromRow, fromCol, toRow, toCol)) {
+            const enemyClass = currentPlayer === "player1" ? "player2" : "player1";
+            const targetEnemy = square.querySelector(`.${enemyClass}`);
+    
+            const playerPiece = selectedSquare.querySelector(`.${currentPlayer}`);
+            animatePieceMove(playerPiece, square);
+    
+            if (targetEnemy) {
+              targetEnemy.remove();
+              if (currentPlayer === "player1") score1 += 10;
+              else score2 += 10;
+              updateScores();
+            }
+    
+            selectedSquare = null;
+            checkWinner();
+            switchPlayer();
+          }
+        }
+      });
+    
+      function startGame() {
+        createBoard();
+        placePieces();
+        score1 = 0;
+        score2 = 0;
+        currentPlayer = "player1";
+        selectedSquare = null;
+        updateScores();
+        winnerMsg.textContent = "";
+      }
+    
+      startGame();
+    </script>
+  
+  </body>
+  </html>
